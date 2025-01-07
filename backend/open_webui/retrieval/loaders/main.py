@@ -115,6 +115,24 @@ class TikaLoader:
             raise Exception(f"Error calling Tika: {r.reason}")
 
 
+class MarkerPdfLoader:
+    def __init__(self, url, file_path):
+        self.file_path = file_path
+        self.url = url
+
+    def load(self) -> list[Document]:
+        params = {"paginate_output": False, "output_format": "markdown"}
+        with open(self.file_path, "rb") as pdf_file:
+            files = {"file": ("tmp.pdf", pdf_file, "application/pdf")}
+            response = requests.post(self.url, data=params, files=files)
+
+        if response.status_code == 200:
+            text = response.json()["output"]
+            return [Document(page_content=text)]
+        else:
+            raise Exception(f"Error calling marker-pdf: {r.reason}")
+
+
 class Loader:
     def __init__(self, engine: str = "", **kwargs):
         self.engine = engine
@@ -147,6 +165,15 @@ class Loader:
                     file_path=file_path,
                     mime_type=file_content_type,
                 )
+        elif (
+            self.engine == "marker-pdf"
+            and file_ext == "pdf"
+            and self.kwargs.get("MARKER_PDF_SERVER_URL")
+        ):
+            marker_sever_url = self.kwargs.get("MARKER_PDF_SERVER_URL")
+            if not marker_sever_url.endswith("/marker/upload"):
+                marker_sever_url += "/marker/upload"
+            loader = MarkerPdfLoader(url=marker_sever_url, file_path=file_path)
         else:
             if file_ext == "pdf":
                 loader = PyPDFLoader(

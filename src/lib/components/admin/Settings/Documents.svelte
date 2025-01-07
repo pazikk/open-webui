@@ -50,6 +50,8 @@
 	let contentExtractionEngine = 'default';
 	let tikaServerUrl = '';
 	let showTikaServerUrl = false;
+	let showMarkerPdfServerUrl = false;
+	let markerPdfServerUrl = '';
 
 	let textSplitter = '';
 	let chunkSize = 0;
@@ -175,6 +177,12 @@
 			toast.error($i18n.t('Tika Server URL required.'));
 			return;
 		}
+		
+		if (contentExtractionEngine === 'marker-pdf' && markerPdfServerUrl === '') {
+			toast.error($i18n.t('Marekr Pdf Server URL required.'));
+			return;
+		}
+		
 		const res = await updateRAGConfig(localStorage.token, {
 			pdf_extract_images: pdfExtractImages,
 			enable_google_drive_integration: enableGoogleDriveIntegration,
@@ -189,7 +197,9 @@
 			},
 			content_extraction: {
 				engine: contentExtractionEngine,
-				tika_server_url: tikaServerUrl
+				tika_server_url: tikaServerUrl,
+				marker_pdf_server_url: markerPdfServerUrl
+				
 			}
 		});
 
@@ -245,6 +255,8 @@
 			contentExtractionEngine = res.content_extraction.engine;
 			tikaServerUrl = res.content_extraction.tika_server_url;
 			showTikaServerUrl = contentExtractionEngine === 'tika';
+			markerPdfServerUrl = res.content_extraction.marker_pdf_server_url;
+			showMarkerPdfServerUrl = contentExtractionEngine === 'marker-pdf';
 
 			fileMaxSize = res?.file.max_size ?? '';
 			fileMaxCount = res?.file.max_count ?? '';
@@ -568,10 +580,12 @@
 						bind:value={contentExtractionEngine}
 						on:change={(e) => {
 							showTikaServerUrl = e.target.value === 'tika';
+							showMarkerPdfServerUrl = e.target.value === 'marker-pdf';
 						}}
 					>
 						<option value="">{$i18n.t('Default')} </option>
 						<option value="tika">{$i18n.t('Tika')}</option>
+						<option value="marker-pdf">{$i18n.t('marker-pdf')}</option>
 					</select>
 				</div>
 			</div>
@@ -583,6 +597,17 @@
 							class="w-full rounded-lg py-2 px-4 text-sm bg-gray-50 dark:text-gray-300 dark:bg-gray-850 outline-none"
 							placeholder={$i18n.t('Enter Tika Server URL')}
 							bind:value={tikaServerUrl}
+						/>
+					</div>
+				</div>
+			{/if}
+			{#if showMarkerPdfServerUrl}
+				<div class="flex w-full mt-1">
+					<div class="flex-1 mr-2">
+						<input
+							class="w-full rounded-lg py-2 px-4 text-sm bg-gray-50 dark:text-gray-300 dark:bg-gray-850 outline-none"
+							placeholder={$i18n.t('Enter marker-pdf Server URL')}
+							bind:value={markerPdfServerUrl}
 						/>
 					</div>
 				</div>

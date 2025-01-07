@@ -1249,6 +1249,12 @@ TIKA_SERVER_URL = PersistentConfig(
     os.getenv("TIKA_SERVER_URL", "http://tika:9998"),  # Default for sidecar deployment
 )
 
+MARKER_PDF_SERVER_URL = PersistentConfig(
+    "MARKER_PDF_SERVER_URL",
+    "rag.marker_pdf_server_url",
+    os.getenv("MARKER_PDF_SERVER_URL", "http://127.0.0.1:8001"),
+)
+
 RAG_TOP_K = PersistentConfig(
     "RAG_TOP_K", "rag.top_k", int(os.environ.get("RAG_TOP_K", "3"))
 )
